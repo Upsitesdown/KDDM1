@@ -1,0 +1,68 @@
+goals - number of goals 
+assists - number of assists
+num_of_shots - number of shots 
+shot_speed - speed of shot in km/h
+shot_attempts - attempts of shots 
+shooting_percentage - how efficient a player is at scoring goals when they shoot the puck 
+high_danger_shots - shots taken close to the goal, in central areas, where the chance of scoring is much higher than average 
+medium_danger_shots - shots taken from moderately good scoring areas
+low_danger_shots - shots taken from farther away with poor angles
+save_percentage - how many shots they stop out of all shots they face 
+winning_goals - goals that give a team the lead they never lose for the rest of the game
+power_play_time - amount of time a player spends on the ice while their team has a player advantage 
+power_play_goals - goals scored during power play 
+time_on_ice - time player spent on ice
+faceoff_win_percentage - how often a player wins faceoffs compared to how many they take 
+puck_touches - number of time a player makes contact with the puck 
+puck_recoveries - number of time a player regains control of a loose puck 
+puck_possession_time - total time a player actively controls the puck during play 
+penalty_kill_time - time player spends on ice while their team is shorthanded
+penalty_minutes - total number of minutes a player spends in the penalty box 
+penalties_taken - number of times a player commits infractions that result in penalties 
+time_between_penalties - average time elapsed between a players penalties 
+goals_against_total - number of goals a goalie allows over a period 
+goals_against_average - average number of goals a goalie allows per game 
+passes_attempted - total number of passes a player tries to make 
+passes_completed - the number of passes that successfully reach a teammate 
+pass_completion_rate - rate of completed passes 
+games_missed_due_to_injury - number of games missed due to injury 
+----
+first_name - first name
+last_name - last name 
+age - age 
+birth_city - city they were born in 
+school_grade - average school grade 
+years_in_usa - years spent in USA 
+eye_color - eye color 
+stuffed_animal_name - name of favourite stuffed animal 
+favourite_board_game - favourite board game 
+personal_notes - notes about player 
+favourite_child_info - information about favourite child 
+favourite_tv_show - favourite TV show 
+favourite_food - favourite food
+----
+height - height of the player 
+weight - weight of the player 
+age_in_years - age 
+shoe_size - shoe size 
+body_fat_percentage - body fat percentage 
+fitness_level - fitness level 
+sprint_time - the time it takes for a player to reach top speed or cover a short distance at maximum effort 
+medical_information - relevant medical information
+return_date - date when the player is cleared to return 
+physician_signature - signature of the physician 
+----
+position - position where the player plays 
+dominant_hand - dominant hand 
+experience_level - experience level of the player 
+years_played - years they played 
+years_pro - years with a pro contract 
+scout_notes - notes about the player by trusted individuals 
+----
+contracts_signed - number of contracts signed 
+salary - current salary 
+captain - whether the player is captain 
+won_championship - whether the player won a championship 
+jersey_number - prefered jersey number 
+draft_year - year the player was drafted 
+number_of_previous_teams - count of different teams a player has played for before their current team
