@@ -1,6 +1,6 @@
 """
 KDDM1 – Phase I EDA helpers.
-Compact graph-focused outputs (no slide-specific CSV/Markdown exports).
+Small Phase I EDA helpers: plots, summary tables, findings, and slide plan.
 """
 
 from __future__ import annotations
@@ -251,10 +251,12 @@ def _relationship_corr_and_pairs(df: pd.DataFrame, out_dir: Path) -> pd.DataFram
 
     # Strongest off-diagonal pairs (upper triangle only, no mirrored duplicates).
     iu = np.triu_indices_from(corr, k=1)
+    raw_r = corr.to_numpy()[iu]
     pairs = pd.DataFrame({
         "feature_a": corr.index.to_numpy()[iu[0]],
         "feature_b": corr.columns.to_numpy()[iu[1]],
-        "abs_pearson_r": np.abs(corr.to_numpy()[iu]),
+        "pearson_r": raw_r,
+        "abs_pearson_r": np.abs(raw_r),
     }).sort_values("abs_pearson_r", ascending=False).head(10)
     pairs.to_csv(out_dir / "top_correlations.csv", index=False)
     return pairs
@@ -283,7 +285,7 @@ def _plot_relationship_views(df: pd.DataFrame, out_dir: Path) -> None:
 def _write_findings(miss_tbl: pd.DataFrame, outliers: pd.DataFrame,
                     pairs: pd.DataFrame, df: pd.DataFrame, out_dir: Path) -> None:
     biggest_miss = miss_tbl[miss_tbl["missing_percent"] > 0].head(3)
-    worst = outliers.sort_values("domain_violations", ascending=False).head(3)
+    worst = outliers[outliers["column"] != "age_in_years"].sort_values("domain_violations", ascending=False).head(3)
     strongest = pairs.head(3)
 
     lines = ["# Phase I – Most important findings\n"]
@@ -295,22 +297,26 @@ def _write_findings(miss_tbl: pd.DataFrame, outliers: pd.DataFrame,
     lines.append("## Missingness (largest issues)")
     for _, r in biggest_miss.iterrows():
         lines.append(f"- `{r['column']}`: {r['missing_percent']}% missing ({r['feature_type']}).")
-    lines.append("- Strategy is documented per column in `missingness_strategy.csv`; values are NOT yet imputed.\n")
+    lines.append("- Strategy is documented per column in `missingness_strategy.csv`; values are NOT yet imputed.")
+    lines.append("- We cannot prove from Phase I whether missingness is MCAR, MAR, or NMAR; imputation is proposed cautiously by feature type.")
+    lines.append("- Missingness mechanism check: columns whose missingness is related to observed features are treated as MAR-like candidates. If no relation is found, this is only consistent with MCAR, not proof. NMAR cannot be proven from observed values alone.\n")
 
     lines.append("## Outliers / domain validity")
     for _, r in worst.iterrows():
         lines.append(f"- `{r['column']}`: {int(r['domain_violations'])} domain violations; raw range [{r['min']:.2f}, {r['max']:.2f}].")
-    lines.append("- These are likely data-entry errors (e.g. age 455, height > 3 m) and should be set to NaN before Phase II.")
+    lines.append("- These are likely data-entry errors (e.g. age 455, height > 3 m) and should be replaced with NaN before Phase II.")
+    lines.append("- IQR outliers are only flagged as unusual; only domain-impossible values are candidates for conversion to NaN.")
+    lines.append("- Rare but plausible players should not be deleted automatically.")
     lines.append("- Distinguish: missing vs unknown vs domain-invalid vs rare-but-plausible values.\n")
 
     lines.append("## Strongest linear relationships")
     for _, r in strongest.iterrows():
-        lines.append(f"- `{r['feature_a']}` ↔ `{r['feature_b']}`: |r| = {r['abs_pearson_r']:.2f}.")
+        lines.append(f"- `{r['feature_a']}` and `{r['feature_b']}`: strong linear association (r\u2009=\u2009{r['pearson_r']:+.2f}).")
     lines.append("- Pearson is **linear only**, sensitive to outliers, and **does not imply causation**.")
     lines.append("- Highly correlated counters (shots / attempts / passes) indicate multicollinearity to handle later.\n")
 
     lines.append("## Recommended next steps before Phase II")
-    lines.append("- Apply domain-rule clipping → NaN, then impute per type AFTER the train/test split.")
+    lines.append("- Replace domain-impossible values with NaN, then impute per type AFTER the train/test split.")
     lines.append("- Decide multicollinearity handling for redundant counters.")
     lines.append("- Treat free-text columns separately; not direct model features.")
     (out_dir / "findings_summary.md").write_text("\n".join(lines), encoding="utf-8")
@@ -365,11 +371,12 @@ Exactly 8 slides. Phase II / target variable is NOT used.
 
 ## Slide 6 — Cleaning I: Missing Values
 - Category: Data cleaning / imputation
-- Outputs: `missingness_top20.png`, `missingness_summary.csv`, `missingness_strategy.csv`
+- Outputs: `missingness_top20.png`, `missingness_summary.csv`, `missingness_strategy.csv`, `missingness_mechanism_check.csv`
 - Bullets:
   - Per-column missing count and percent quantified.
   - Strategy documented per type: drop / 'Unknown' category / median (post-split) / NaT + flag.
   - Missing values are NOT blindly imputed in Phase I.
+  - Missingness mechanism (MCAR / MAR / NMAR) cannot be determined from Phase I; imputation is proposed cautiously.
 
 ## Slide 7 — Cleaning II: Outliers & Invalid Values
 - Category: Data cleaning / imputation
@@ -377,7 +384,8 @@ Exactly 8 slides. Phase II / target variable is NOT used.
 - Bullets:
   - IQR outliers + domain plausibility violations per numeric column.
   - Domain rules: e.g. age ∈ [15, 50], height ∈ [1.4, 2.3] m, percentages ∈ [0, 100], counters ≥ 0.
-  - Plan: set domain-impossible values to NaN; flag rather than delete rare-but-plausible values.
+  - Plan: replace domain-impossible values with NaN; flag rather than delete rare-but-plausible values.
+  - IQR outliers are flagged, not removed; only domain-impossible values are NaN candidates.
 
 ## Slide 8 — Most Important Findings / Discussion
 - Category: Findings
@@ -388,6 +396,76 @@ Exactly 8 slides. Phase II / target variable is NOT used.
   - Next cleaning steps before Phase II.
 """
     (out_dir / "phase1_slide_plan.md").write_text(md, encoding="utf-8")
+
+
+def analyze_missingness_mechanisms(df: pd.DataFrame, out_dir: Path) -> pd.DataFrame:
+    """Simple check whether missingness correlates with observed features."""
+    cat_preds = [c for c in ["position", "gender", "fitness_level", "nationality"] if c in df.columns]
+    num_preds = [c for c in ["age", "height", "weight", "games_missed_due_to_injury", "contracts_signed"] if c in df.columns]
+    # include any source/merge indicator columns
+    for c in df.columns:
+        if ("source" in c.lower() or "merge" in c.lower()) and c not in cat_preds + num_preds:
+            if pd.api.types.is_numeric_dtype(df[c]):
+                num_preds.append(c)
+            else:
+                cat_preds.append(c)
+
+    miss_pct = df.isna().mean() * 100
+    candidates = [c for c in df.columns if 0 < miss_pct[c] < 100]
+
+    rows = []
+    # also note 100% missing columns
+    for c in df.columns:
+        if miss_pct[c] == 100:
+            rows.append({"missing_column": c, "missing_percent": 100.0,
+                         "best_related_feature": "", "relation_type": "", "score": np.nan,
+                         "interpretation": "100% missing: unusable column, mechanism cannot be tested"})
+
+    for col in candidates:
+        is_miss = df[col].isna()
+        n_miss, n_obs = int(is_miss.sum()), int((~is_miss).sum())
+        if min(n_miss, n_obs) < 10:
+            rows.append({"missing_column": col, "missing_percent": round(miss_pct[col], 2),
+                         "best_related_feature": "", "relation_type": "", "score": np.nan,
+                         "interpretation": "cannot test: too few missing/non-missing rows"})
+            continue
+
+        best_feat, best_score, best_type = "", 0.0, ""
+
+        for p in cat_preds:
+            if df[p].isna().all():
+                continue
+            rates = df.groupby(p)[col].apply(lambda s: s.isna().mean())
+            diff = rates.max() - rates.min()
+            if diff > best_score:
+                best_score, best_feat, best_type = diff, p, "categorical_rate_diff"
+
+        for p in num_preds:
+            s = df[p]
+            if s.isna().all() or s.std() == 0:
+                continue
+            med_miss = s[is_miss].median()
+            med_obs = s[~is_miss].median()
+            std = s.std()
+            if pd.isna(med_miss) or pd.isna(med_obs) or std == 0:
+                continue
+            norm_diff = abs(med_miss - med_obs) / std
+            if norm_diff > best_score:
+                best_score, best_feat, best_type = norm_diff, p, "numeric_median_diff"
+
+        threshold = 0.20 if best_type == "categorical_rate_diff" else 0.50
+        if best_score >= threshold:
+            interp = "possible MAR: missingness changes by observed feature"
+        else:
+            interp = "no strong observed relation found; consistent with MCAR but not proof"
+
+        rows.append({"missing_column": col, "missing_percent": round(miss_pct[col], 2),
+                     "best_related_feature": best_feat, "relation_type": best_type,
+                     "score": round(best_score, 4), "interpretation": interp})
+
+    result = pd.DataFrame(rows)
+    result.to_csv(out_dir / "missingness_mechanism_check.csv", index=False)
+    return result
 
 
 TARGET_LIKE = {"target", "label", "y", "is_talent", "prospect", "prospect_grade"}
@@ -419,8 +497,6 @@ def validate_phase1_outputs(out_dir: Path, df: pd.DataFrame) -> None:
          (out_dir / "relationships_correlation_heatmap.png").exists()
          and (out_dir / "relationships_scatter_grouped.png").exists()),
         ("Findings summary exists", (out_dir / "findings_summary.md").exists()),
-        ("Correlation analysis uses domain-filtered copy", True),
-        ("Code ran end-to-end", True),
     ]
 
     lines = ["PHASE I VALIDATION CHECKLIST", "=" * 60]
@@ -429,6 +505,10 @@ def validate_phase1_outputs(out_dir: Path, df: pd.DataFrame) -> None:
     lines.append("")
     lines.append(f"Missing files: {[f for f in required if not (out_dir / f).exists()]}")
     lines.append(f"Slide sections found: {n_slides}")
+    lines.append("")
+    lines.append("Notes (not auto-checked):")
+    lines.append("  - Correlation heatmap uses domain-filtered copy (see _domain_filtered).")
+    lines.append("  - Verify end-to-end run by checking all output files above exist.")
     text = "\n".join(lines)
     print("\n" + text)
     (out_dir / "validation_checklist.txt").write_text(text, encoding="utf-8")
@@ -442,6 +522,7 @@ def run_phase1_eda(df: pd.DataFrame, out_dir: Path = OUT_DIR) -> None:
     outlier_summary = _plot_outliers(df, out_dir)
     top_pairs = _relationship_corr_and_pairs(df, out_dir)
     _plot_relationship_views(df, out_dir)
+    analyze_missingness_mechanisms(df, out_dir)
     _write_findings(miss_tbl, outlier_summary, top_pairs, df, out_dir)
     _write_slide_plan(out_dir)
 

@@ -8,8 +8,10 @@ PHASE I VALIDATION CHECKLIST
   [x] Outlier summary exists
   [x] Relationship plots exist
   [x] Findings summary exists
-  [x] Correlation analysis uses domain-filtered copy
-  [x] Code ran end-to-end
 
 Missing files: []
 Slide sections found: 8
+
+Notes (not auto-checked):
+  - Correlation heatmap uses domain-filtered copy (see _domain_filtered).
+  - Verify end-to-end run by checking all output files above exist.

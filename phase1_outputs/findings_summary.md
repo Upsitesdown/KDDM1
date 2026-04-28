@@ -10,22 +10,26 @@
 - `favourite_food`: 100.0% missing (text).
 - `medical_information`: 85.18% missing (text).
 - Strategy is documented per column in `missingness_strategy.csv`; values are NOT yet imputed.
+- We cannot prove from Phase I whether missingness is MCAR, MAR, or NMAR; imputation is proposed cautiously by feature type.
+- Missingness mechanism check: columns whose missingness is related to observed features are treated as MAR-like candidates. If no relation is found, this is only consistent with MCAR, not proof. NMAR cannot be proven from observed values alone.
 
 ## Outliers / domain validity
-- `age_in_years`: 130 domain violations; raw range [18.00, 455.00].
 - `age`: 129 domain violations; raw range [18.00, 455.00].
 - `height`: 61 domain violations; raw range [1.32, 3.09].
-- These are likely data-entry errors (e.g. age 455, height > 3 m) and should be set to NaN before Phase II.
+- `body_fat_percentage`: 14 domain violations; raw range [13.99, 37.34].
+- These are likely data-entry errors (e.g. age 455, height > 3 m) and should be replaced with NaN before Phase II.
+- IQR outliers are only flagged as unusual; only domain-impossible values are candidates for conversion to NaN.
+- Rare but plausible players should not be deleted automatically.
 - Distinguish: missing vs unknown vs domain-invalid vs rare-but-plausible values.
 
 ## Strongest linear relationships
-- `passes_completed` ↔ `pass_completion_rate`: |r| = 0.75.
-- `puck_touches` ↔ `passes_completed`: |r| = 0.71.
-- `height` ↔ `body_fat_percentage`: |r| = 0.70.
+- `passes_completed` and `pass_completion_rate`: strong linear association (r = +0.75).
+- `puck_touches` and `passes_completed`: strong linear association (r = +0.71).
+- `height` and `body_fat_percentage`: strong linear association (r = -0.70).
 - Pearson is **linear only**, sensitive to outliers, and **does not imply causation**.
 - Highly correlated counters (shots / attempts / passes) indicate multicollinearity to handle later.
 
 ## Recommended next steps before Phase II
-- Apply domain-rule clipping → NaN, then impute per type AFTER the train/test split.
+- Replace domain-impossible values with NaN, then impute per type AFTER the train/test split.
 - Decide multicollinearity handling for redundant counters.
 - Treat free-text columns separately; not direct model features.
