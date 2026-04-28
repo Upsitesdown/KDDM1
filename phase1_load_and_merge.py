@@ -8,10 +8,8 @@ import pickle
 import warnings
 from pathlib import Path
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import seaborn as sns
 
 warnings.filterwarnings("ignore")
 
@@ -144,6 +142,7 @@ def load_moms_notes(path: str | Path) -> pd.DataFrame:
 
 def merge_all(id0, id1, perf, medical, scouting, contracts, moms) -> pd.DataFrame:
     """Merge all datasets into a single master table."""
+
     # Merge identity tables
     identity = pd.merge(id0, id1, on=["international_id", "medical_id"], how="outer", suffixes=("_id0", "_id1"))
 
@@ -209,77 +208,6 @@ def merge_all(id0, id1, perf, medical, scouting, contracts, moms) -> pd.DataFram
     return df
 
 
-def run_eda(df: pd.DataFrame, out_dir: Path = Path("eda_plots")) -> None:
-    """Run exploratory data analysis and save plots."""
-    out_dir.mkdir(exist_ok=True)
-
-    print("\n" + "="*60)
-    print("DATASET OVERVIEW")
-    print("="*60)
-    print(f"Shape: {len(df):,} rows × {len(df.columns)} columns")
-    print(f"Memory: {df.memory_usage(deep=True).sum() / 1e6:.1f} MB\n")
-
-    # Missing values
-    missing = df.isnull().sum()
-    missing_pct = (missing / len(df) * 100).round(2)
-    miss_df = pd.DataFrame({"count": missing, "percent": missing_pct})
-    miss_df = miss_df[miss_df["count"] > 0].sort_values("percent", ascending=False)
-    print("Missing values (top 20):")
-    print(miss_df.head(20).to_string())
-
-    fig, ax = plt.subplots(figsize=(10, 6))
-    sns.barplot(x=miss_df.head(20)["percent"], y=miss_df.head(20).index, ax=ax, color="steelblue")
-    ax.set_title("Missing Values")
-    ax.set_xlabel("Percent (%)")
-    plt.tight_layout()
-    fig.savefig(out_dir / "missing_values.png", dpi=150)
-    plt.close()
-    print(f"\nSaved: missing_values.png")
-
-    # Data types
-    print("\n" + "="*60)
-    print("DATA TYPES")
-    print("="*60)
-    print(df.dtypes.value_counts())
-
-    # Numeric summary
-    print("\n" + "="*60)
-    print("NUMERIC SUMMARY")
-    print("="*60)
-    print(df.describe().T.head(10).to_string())
-
-    # Correlation heatmap
-    perf_cols = [
-        "goals", "assists", "num_of_shots", "shot_speed", "shooting_percentage",
-        "time_on_ice", "puck_touches", "passes_completed", "pass_completion_rate",
-        "penalty_minutes", "games_missed_due_to_injury",
-    ]
-    perf_cols = [c for c in perf_cols if c in df.columns]
-    if perf_cols:
-        fig, ax = plt.subplots(figsize=(12, 9))
-        corr = df[perf_cols].corr()
-        mask = np.triu(np.ones_like(corr, dtype=bool))
-        sns.heatmap(corr, mask=mask, annot=True, fmt=".2f", cmap="coolwarm", center=0, ax=ax)
-        ax.set_title("Correlation – Performance Features")
-        plt.tight_layout()
-        fig.savefig(out_dir / "correlation_performance.png", dpi=150)
-        plt.close()
-        print(f"Saved: correlation_performance.png")
-
-    # Age distribution
-    if "age" in df.columns:
-        fig, ax = plt.subplots(figsize=(8, 4))
-        df["age"].dropna().plot.hist(bins=30, ax=ax, color="steelblue", edgecolor="white")
-        ax.set_title("Age Distribution")
-        ax.set_xlabel("Age")
-        plt.tight_layout()
-        fig.savefig(out_dir / "age_distribution.png", dpi=150)
-        plt.close()
-        print(f"Saved: age_distribution.png")
-
-    print(f"\nEDA complete – plots saved to: {out_dir.resolve()}")
-
-
 if __name__ == "__main__":
     print("Loading data...\n")
     id0 = load_identity_card_0(DATA_DIR)
@@ -294,8 +222,10 @@ if __name__ == "__main__":
     df = merge_all(id0, id1, perf, medical, scouting, contracts, moms)
     print(f"\nFinal shape: {len(df):,} rows × {len(df.columns)} columns")
 
-    print("\nRunning EDA...")
-    run_eda(df)
+    print("\nRunning Phase I EDA...")
+    from phase1_eda import OUT_DIR, run_phase1_eda
+
+    run_phase1_eda(df)
 
     df.to_csv("merged_dataset.csv", index=False)
-    print("\nSaved: merged_dataset.csv")
+    print(f"\nSaved: merged_dataset.csv  +  graphs in {OUT_DIR}/")
