@@ -29,7 +29,10 @@
 - Pearson is **linear only**, sensitive to outliers, and **does not imply causation**.
 - Highly correlated counters (shots / attempts / passes) indicate multicollinearity to handle later.
 
+## Processed dataset
+- Domain-impossible values are replaced with NaN in `phase1_processed_dataset.csv`, and corresponding `<column>_invalid_flag` columns preserve where invalid values occurred. IQR outliers are not removed automatically.
+
 ## Recommended next steps before Phase II
-- Replace domain-impossible values with NaN, then impute per type AFTER the train/test split.
+- Impute NaN values per type AFTER the train/test split.
 - Decide multicollinearity handling for redundant counters.
 - Treat free-text columns separately; not direct model features.

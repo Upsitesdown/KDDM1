@@ -226,6 +226,66 @@ def _domain_filtered(df: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
+def make_phase1_processed_data(df: pd.DataFrame, out_dir: Path) -> pd.DataFrame:
+    """Replace domain-impossible values with NaN and add invalid flag columns."""
+    processed = df.copy()
+    summary_rows = []
+
+    # Domain range checks
+    for col, (lo, hi) in DOMAIN_RANGES.items():
+        if col not in processed.columns or not pd.api.types.is_numeric_dtype(processed[col]):
+            continue
+        s = processed[col]
+        mask = pd.Series(False, index=processed.index)
+        if lo is not None:
+            mask |= s < lo
+        if hi is not None:
+            mask |= s > hi
+        mask = mask & s.notna()
+        n_inv = int(mask.sum())
+        if n_inv > 0:
+            processed[f"{col}_invalid_flag"] = mask.astype(int)
+            summary_rows.append({
+                "column": col,
+                "rule": f"valid range: {lo} to {hi}",
+                "invalid_count": n_inv,
+                "invalid_percent": round(n_inv / len(processed) * 100, 2),
+                "min_before": float(s.min()),
+                "max_before": float(s.max()),
+            })
+            processed.loc[mask, col] = np.nan
+
+    # Non-negative checks (columns not already covered by DOMAIN_RANGES)
+    for col in NON_NEGATIVE:
+        if col in DOMAIN_RANGES or col not in processed.columns:
+            continue
+        if not pd.api.types.is_numeric_dtype(processed[col]):
+            continue
+        s = processed[col]
+        mask = (s < 0) & s.notna()
+        n_inv = int(mask.sum())
+        if n_inv > 0:
+            processed[f"{col}_invalid_flag"] = mask.astype(int)
+            summary_rows.append({
+                "column": col,
+                "rule": "must be non-negative",
+                "invalid_count": n_inv,
+                "invalid_percent": round(n_inv / len(processed) * 100, 2),
+                "min_before": float(s.min()),
+                "max_before": float(s.max()),
+            })
+            processed.loc[mask, col] = np.nan
+
+    # Save outputs
+    processed.to_csv(out_dir / "phase1_processed_dataset.csv", index=False)
+    summary = pd.DataFrame(summary_rows)
+    summary.to_csv(out_dir / "invalid_value_summary.csv", index=False)
+
+    print(f"\nProcessed dataset: {len(processed)} rows, {len(processed.columns)} cols")
+    print(f"Invalid values replaced with NaN: {sum(r['invalid_count'] for r in summary_rows)} across {len(summary_rows)} columns")
+    return processed
+
+
 def _relationship_corr_and_pairs(df: pd.DataFrame, out_dir: Path) -> pd.DataFrame:
     corr_cols = [
         c for c in [
@@ -315,8 +375,11 @@ def _write_findings(miss_tbl: pd.DataFrame, outliers: pd.DataFrame,
     lines.append("- Pearson is **linear only**, sensitive to outliers, and **does not imply causation**.")
     lines.append("- Highly correlated counters (shots / attempts / passes) indicate multicollinearity to handle later.\n")
 
+    lines.append("## Processed dataset")
+    lines.append("- Domain-impossible values are replaced with NaN in `phase1_processed_dataset.csv`, and corresponding `<column>_invalid_flag` columns preserve where invalid values occurred. IQR outliers are not removed automatically.\n")
+
     lines.append("## Recommended next steps before Phase II")
-    lines.append("- Replace domain-impossible values with NaN, then impute per type AFTER the train/test split.")
+    lines.append("- Impute NaN values per type AFTER the train/test split.")
     lines.append("- Decide multicollinearity handling for redundant counters.")
     lines.append("- Treat free-text columns separately; not direct model features.")
     (out_dir / "findings_summary.md").write_text("\n".join(lines), encoding="utf-8")
@@ -380,12 +443,12 @@ Exactly 8 slides. Phase II / target variable is NOT used.
 
 ## Slide 7 — Cleaning II: Outliers & Invalid Values
 - Category: Data cleaning / imputation
-- Outputs: `outliers_boxplots.png`, `outlier_summary.csv`
+- Outputs: `outliers_boxplots.png`, `outlier_summary.csv`, `phase1_processed_dataset.csv`, `invalid_value_summary.csv`
 - Bullets:
-  - IQR outliers + domain plausibility violations per numeric column.
-  - Domain rules: e.g. age ∈ [15, 50], height ∈ [1.4, 2.3] m, percentages ∈ [0, 100], counters ≥ 0.
-  - Plan: replace domain-impossible values with NaN; flag rather than delete rare-but-plausible values.
-  - IQR outliers are flagged, not removed; only domain-impossible values are NaN candidates.
+  - IQR outliers are flagged only.
+  - Domain-impossible values are replaced with `NaN`.
+  - Invalid flags preserve the information that the original value was invalid.
+  - No rows are deleted.
 
 ## Slide 8 — Most Important Findings / Discussion
 - Category: Findings
@@ -479,6 +542,7 @@ def validate_phase1_outputs(out_dir: Path, df: pd.DataFrame) -> None:
         "missingness_summary.csv", "missingness_strategy.csv",
         "outlier_summary.csv", "top_correlations.csv",
         "findings_summary.md", "phase1_slide_plan.md",
+        "phase1_processed_dataset.csv", "invalid_value_summary.csv",
     ]
     no_target = not (set(df.columns) & TARGET_LIKE)
 
@@ -520,6 +584,7 @@ def run_phase1_eda(df: pd.DataFrame, out_dir: Path = OUT_DIR) -> None:
 
     miss_tbl = _plot_missingness(df, out_dir)
     outlier_summary = _plot_outliers(df, out_dir)
+    make_phase1_processed_data(df, out_dir)
     top_pairs = _relationship_corr_and_pairs(df, out_dir)
     _plot_relationship_views(df, out_dir)
     analyze_missingness_mechanisms(df, out_dir)

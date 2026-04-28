@@ -55,12 +55,12 @@ Exactly 8 slides. Phase II / target variable is NOT used.
 
 ## Slide 7 — Cleaning II: Outliers & Invalid Values
 - Category: Data cleaning / imputation
-- Outputs: `outliers_boxplots.png`, `outlier_summary.csv`
+- Outputs: `outliers_boxplots.png`, `outlier_summary.csv`, `phase1_processed_dataset.csv`, `invalid_value_summary.csv`
 - Bullets:
-  - IQR outliers + domain plausibility violations per numeric column.
-  - Domain rules: e.g. age ∈ [15, 50], height ∈ [1.4, 2.3] m, percentages ∈ [0, 100], counters ≥ 0.
-  - Plan: replace domain-impossible values with NaN; flag rather than delete rare-but-plausible values.
-  - IQR outliers are flagged, not removed; only domain-impossible values are NaN candidates.
+  - IQR outliers are flagged only.
+  - Domain-impossible values are replaced with `NaN`.
+  - Invalid flags preserve the information that the original value was invalid.
+  - No rows are deleted.
 
 ## Slide 8 — Most Important Findings / Discussion
 - Category: Findings
