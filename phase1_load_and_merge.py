@@ -11,6 +11,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from phase1_eda import OUT_DIR, run_phase1_eda
+
 warnings.filterwarnings("ignore")
 
 DATA_DIR = Path("./Data-20260425")
@@ -223,7 +225,6 @@ if __name__ == "__main__":
     print(f"\nFinal shape: {len(df):,} rows × {len(df.columns)} columns")
 
     print("\nRunning Phase I EDA...")
-    from phase1_eda import OUT_DIR, run_phase1_eda
 
     run_phase1_eda(df)
 
