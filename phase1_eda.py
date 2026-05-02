@@ -22,7 +22,7 @@ TEXT_COLS = {
     "favourite_child_info", "favourite_tv_show", "favourite_food",
 }
 
-# Domain plausibility ranges used for outlier checks and cleaner plots.
+# Estimate plausible ranges (outlier checks)s
 DOMAIN_RANGES: dict[str, tuple[float | None, float | None]] = {
     "age": (15, 50),
     "age_in_years": (15, 50),

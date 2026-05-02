@@ -4,16 +4,11 @@ Phase I: Data Loading, Merging & Initial EDA
 """
 
 import json
-import pickle
-import warnings
 from pathlib import Path
-
 import numpy as np
 import pandas as pd
 
 from phase1_eda import OUT_DIR, run_phase1_eda
-
-warnings.filterwarnings("ignore")
 
 DATA_DIR = Path("./Data-20260425")
 
@@ -113,37 +108,33 @@ def load_medical(data_dir: Path) -> pd.DataFrame:
     df["fitness_level"] = df["fitness_level"].astype(str).str.strip().str.lower().map(fitness_map)
     df["return_date"] = pd.to_datetime(df["return_date"], errors="coerce")
 
-    print("Success: load medical")
     print(f"[medical]          {len(df):,} rows")
     return df
 
 
 def load_scouting_notes(data_dir: Path) -> pd.DataFrame:
     df = pd.read_csv(data_dir / "hockey_scouting_notes.csv")
-    print("Success: load scouting notes")
     print(f"[scouting_notes]   {len(df):,} rows")
     return df
 
 
 def load_contracts(data_dir: Path) -> pd.DataFrame:
     df = pd.read_pickle(data_dir / "contracts_competition.pkl")
-    print("Success: load contracts")
     print(f"[contracts]        {len(df):,} rows")
     return df
 
 
 def load_moms_notes(path: str | Path) -> pd.DataFrame:
-    """Load mom's notes from JSON."""
     with open(path, encoding="utf-8") as f:
         data = json.load(f)
     df = pd.json_normalize(data)
     df.replace("", np.nan, inplace=True)
-    print(f"Success: load moms notes ({len(df):,} rows)")
+    print(f"Moms notes: ({len(df):,} rows)")
     return df
 
 
 def merge_all(id0, id1, perf, medical, scouting, contracts, moms) -> pd.DataFrame:
-    """Merge all datasets into a single master table."""
+    """Merge all datasets into a single table."""
 
     # Merge identity tables
     identity = pd.merge(id0, id1, on=["international_id", "medical_id"], how="outer", suffixes=("_id0", "_id1"))
