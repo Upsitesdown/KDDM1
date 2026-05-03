@@ -1,5 +1,5 @@
-from eda import run_eda
-from load_and_merge import build_merged_dataset
+from utils.eda import run_eda
+from utils.load_and_merge import build_merged_dataset
 
 
 def main() -> None:

@@ -92,7 +92,7 @@ def make_processed_dataset(df: pd.DataFrame, out_dir: Path) -> pd.DataFrame:
             })
             processed.loc[mask, col] = np.nan
 
-    processed.to_csv(out_dir / "phase1_processed_dataset.csv", index=False)
+    processed.to_csv("phase1_processed_dataset.csv", index=False)
     summary = pd.DataFrame(summary_rows)
     summary.to_csv(out_dir / "invalid_value_summary.csv", index=False)
 

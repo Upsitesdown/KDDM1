@@ -5,9 +5,9 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 
-from processing import DOMAIN_RANGES, NON_NEGATIVE, domain_filtered, make_processed_dataset
+from utils.processing import DOMAIN_RANGES, NON_NEGATIVE, domain_filtered, make_processed_dataset
 
-OUT_DIR = Path("phase1_outputs")
+OUT_DIR = Path("phase1_additional_outputs")
 ID_COLS = {"international_id", "medical_id", "physician_signature", "jersey_number"}
 DATE_COLS = {"return_date"}
 TEXT_COLS = {
@@ -313,8 +313,8 @@ def run_eda(df: pd.DataFrame, out_dir: Path = OUT_DIR) -> pd.DataFrame:
     print("Saved outputs in", out_dir)
     if not outlier_summary.empty:
         print("\nTop outlier-domain issues:")
-        print(outlier_summary.head(5).to_string(index=False))
+        print(outlier_summary.head(10).to_string(index=False))
     if not top_pairs.empty:
         print("\nTop absolute correlations (Pearson, linear only):")
-        print(top_pairs.head(5).to_string(index=False))
+        print(top_pairs.head(10).to_string(index=False))
     return processed
