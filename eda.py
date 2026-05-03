@@ -1,10 +1,3 @@
-"""
-KDDM1 – Phase I EDA helpers.
-Small Phase I EDA helpers: plots, summary tables, findings, and slide plan.
-"""
-
-from __future__ import annotations
-
 from pathlib import Path
 
 import matplotlib.pyplot as plt

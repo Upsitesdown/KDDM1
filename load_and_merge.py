@@ -1,10 +1,3 @@
-"""
-KDDM1 – Ice Hockey Talent Scouting
-Phase I: Data loading and dataset merging.
-"""
-
-from __future__ import annotations
-
 import json
 from pathlib import Path
 
