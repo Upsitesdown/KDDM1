@@ -1,0 +1,66 @@
+missing_column,missing_percent,best_related_feature,relation_type,score,interpretation
+favourite_tv_show,100.0,,,,"100% missing: unusable column, mechanism cannot be tested"
+favourite_food,100.0,,,,"100% missing: unusable column, mechanism cannot be tested"
+first_name,0.37,,,0.0,no strong observed relation found; consistent with MCAR but not proof
+last_name,0.37,,,0.0,no strong observed relation found; consistent with MCAR but not proof
+gender,0.37,,,0.0,no strong observed relation found; consistent with MCAR but not proof
+age,0.37,,,0.0,no strong observed relation found; consistent with MCAR but not proof
+birth_city,0.37,,,0.0,no strong observed relation found; consistent with MCAR but not proof
+nationality,0.37,,,0.0,no strong observed relation found; consistent with MCAR but not proof
+goals,0.37,,,0.0,no strong observed relation found; consistent with MCAR but not proof
+assists,0.37,,,0.0,no strong observed relation found; consistent with MCAR but not proof
+num_of_shots,0.37,,,0.0,no strong observed relation found; consistent with MCAR but not proof
+shot_speed,0.37,,,0.0,no strong observed relation found; consistent with MCAR but not proof
+shot_attempts,0.37,,,0.0,no strong observed relation found; consistent with MCAR but not proof
+shooting_percentage,0.37,,,0.0,no strong observed relation found; consistent with MCAR but not proof
+high_danger_shots,0.37,,,0.0,no strong observed relation found; consistent with MCAR but not proof
+medium_danger_shots,0.37,,,0.0,no strong observed relation found; consistent with MCAR but not proof
+low_danger_shots,0.37,,,0.0,no strong observed relation found; consistent with MCAR but not proof
+save_percentage,0.37,,,0.0,no strong observed relation found; consistent with MCAR but not proof
+winning_goals,0.37,,,0.0,no strong observed relation found; consistent with MCAR but not proof
+power_play_time,0.37,,,0.0,no strong observed relation found; consistent with MCAR but not proof
+power_play_goals,0.37,,,0.0,no strong observed relation found; consistent with MCAR but not proof
+time_on_ice,0.37,,,0.0,no strong observed relation found; consistent with MCAR but not proof
+faceoff_win_percentage,0.37,,,0.0,no strong observed relation found; consistent with MCAR but not proof
+puck_touches,0.37,,,0.0,no strong observed relation found; consistent with MCAR but not proof
+puck_recoveries,0.37,,,0.0,no strong observed relation found; consistent with MCAR but not proof
+puck_possession_time,0.37,,,0.0,no strong observed relation found; consistent with MCAR but not proof
+penalty_kill_time,0.37,,,0.0,no strong observed relation found; consistent with MCAR but not proof
+penalty_minutes,0.37,,,0.0,no strong observed relation found; consistent with MCAR but not proof
+penalties_taken,0.37,,,0.0,no strong observed relation found; consistent with MCAR but not proof
+time_between_penalties,0.37,,,0.0,no strong observed relation found; consistent with MCAR but not proof
+goals_against_total,0.37,,,0.0,no strong observed relation found; consistent with MCAR but not proof
+goals_against_average,0.37,,,0.0,no strong observed relation found; consistent with MCAR but not proof
+passes_attempted,0.37,,,0.0,no strong observed relation found; consistent with MCAR but not proof
+passes_completed,0.37,,,0.0,no strong observed relation found; consistent with MCAR but not proof
+pass_completion_rate,0.37,,,0.0,no strong observed relation found; consistent with MCAR but not proof
+games_missed_due_to_injury,0.37,,,0.0,no strong observed relation found; consistent with MCAR but not proof
+height,0.37,,,0.0,no strong observed relation found; consistent with MCAR but not proof
+weight,0.37,,,0.0,no strong observed relation found; consistent with MCAR but not proof
+age_in_years,0.37,,,0.0,no strong observed relation found; consistent with MCAR but not proof
+shoe_size,0.37,,,0.0,no strong observed relation found; consistent with MCAR but not proof
+body_fat_percentage,0.37,,,0.0,no strong observed relation found; consistent with MCAR but not proof
+fitness_level,15.9,nationality,categorical_rate_diff,0.5,possible MAR: missingness changes by observed feature
+sprint_time,0.37,,,0.0,no strong observed relation found; consistent with MCAR but not proof
+medical_information,85.18,nationality,categorical_rate_diff,0.4286,possible MAR: missingness changes by observed feature
+return_date,6.28,nationality,categorical_rate_diff,0.2222,possible MAR: missingness changes by observed feature
+position,0.37,,,0.0,no strong observed relation found; consistent with MCAR but not proof
+dominant_hand,6.51,games_missed_due_to_injury,numeric_median_diff,0.438,no strong observed relation found; consistent with MCAR but not proof
+experience_level,0.37,,,0.0,no strong observed relation found; consistent with MCAR but not proof
+years_played,0.37,,,0.0,no strong observed relation found; consistent with MCAR but not proof
+years_pro,0.37,,,0.0,no strong observed relation found; consistent with MCAR but not proof
+scout_notes,10.38,nationality,categorical_rate_diff,0.3571,possible MAR: missingness changes by observed feature
+contracts_signed,1.22,games_missed_due_to_injury,numeric_median_diff,0.219,no strong observed relation found; consistent with MCAR but not proof
+salary,0.37,,,0.0,no strong observed relation found; consistent with MCAR but not proof
+captain,0.37,,,0.0,no strong observed relation found; consistent with MCAR but not proof
+won_championship,0.37,,,0.0,no strong observed relation found; consistent with MCAR but not proof
+jersey_number,0.37,,,0.0,no strong observed relation found; consistent with MCAR but not proof
+draft_year,0.37,,,0.0,no strong observed relation found; consistent with MCAR but not proof
+number_of_previous_teams,2.06,nationality,categorical_rate_diff,0.3333,possible MAR: missingness changes by observed feature
+school_grade,9.25,nationality,categorical_rate_diff,1.0,possible MAR: missingness changes by observed feature
+years_in_usa,9.25,nationality,categorical_rate_diff,1.0,possible MAR: missingness changes by observed feature
+eye_color,11.84,nationality,categorical_rate_diff,1.0,possible MAR: missingness changes by observed feature
+stuffed_animal_name,9.25,nationality,categorical_rate_diff,1.0,possible MAR: missingness changes by observed feature
+favourite_board_game,12.76,nationality,categorical_rate_diff,1.0,possible MAR: missingness changes by observed feature
+personal_notes,31.99,nationality,categorical_rate_diff,1.0,possible MAR: missingness changes by observed feature
+favourite_child_info,9.25,nationality,categorical_rate_diff,1.0,possible MAR: missingness changes by observed feature

@@ -1,0 +1,11 @@
+feature_a,feature_b,pearson_r,abs_pearson_r
+passes_completed,pass_completion_rate,0.745917958702336,0.745917958702336
+puck_touches,passes_completed,0.7123286781763455,0.7123286781763455
+height,body_fat_percentage,-0.7018297584106885,0.7018297584106885
+assists,games_missed_due_to_injury,0.688491776384613,0.688491776384613
+weight,body_fat_percentage,0.4360439045618246,0.4360439045618246
+games_missed_due_to_injury,age,0.2186729006804011,0.2186729006804011
+assists,passes_completed,0.2022587518558866,0.2022587518558866
+time_on_ice,games_missed_due_to_injury,0.1737820824742093,0.1737820824742093
+passes_completed,games_missed_due_to_injury,0.15466997338854882,0.15466997338854882
+puck_touches,pass_completion_rate,0.14106649751329375,0.14106649751329375
